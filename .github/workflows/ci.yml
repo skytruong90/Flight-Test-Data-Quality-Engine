@@ -1,0 +1,15 @@
+name: CI
+on: [push, pull_request]
+permissions: {contents: read}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: pytest
+      - run: flight-data-quality generate output/demo.csv --samples 200
+      - run: flight-data-quality check output/demo.csv --rules examples/rules.json --report output/report.json --markdown output/report.md
